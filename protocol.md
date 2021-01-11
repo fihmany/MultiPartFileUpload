@@ -47,9 +47,9 @@ Post Method /file
 ```
 ```json
 {
-    "taskId":"[taskId]",
+    "aa":"[aa]",
     ...
-    "type":"[artifactType]",
+    "bb":"[bb]",
     "data":{
         "Compresion":"[gzip/deflta/none]"
     }
