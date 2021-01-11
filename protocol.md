@@ -1,5 +1,4 @@
-# tus resumable upload protocol
-
+# Multi Part File Upload Protocol
 **Version:** 1.0.0 ([SemVer](http://semver.org))<br>
 **Date:** 11-01-2021<br>
 **Authors:** Eran Yom Tov, Yair Fihman<br>
