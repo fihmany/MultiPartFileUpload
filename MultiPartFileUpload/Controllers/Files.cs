@@ -21,6 +21,8 @@ namespace MultiPartFileUpload.Controllers
         private const string ContentLen = "Content-Length";
         private const string UploadOffset = "Upload-Offset";
         private const string IsFinal = "Is-Final";
+        private const string MaxSize = "Max-Size";
+        private const int MaxSizeValue = 30000;
 
         public Files(MultiPartFileUploadBl bl, ILogger<Files> logger)
         {
@@ -29,15 +31,16 @@ namespace MultiPartFileUpload.Controllers
         }
 
         [HttpPost]
-        public CreateUploadContract generateNewUpload()
+        public CreateUploadContract GenerateNewUpload()
         {
-            var tmp = new UploadMetaData()
+            UploadMetaData tmp = new UploadMetaData()
             {
                 Compression = "None",
                 Aa = "aa",
                 Bb = "bb",
                 Data = new Dictionary<string, string>()
             };
+            Response.Headers.Add(MaxSize, MaxSizeValue.ToString());
             return GenerateReturnLocation(Request.Path.Value, _bl.GenerateUploadProcess(tmp));
         }
 
