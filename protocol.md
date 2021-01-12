@@ -73,6 +73,7 @@ Max-Size: 1024
 ```
 PUT /files/17f44dbe1c4bace0e18ab850cf2b3a83 HTTP/1.1
 Content-Length: 5
+Uncompressed-Length: 5
 Upload-Offset: 0
 Is-Final: 0
 
@@ -88,6 +89,7 @@ HTTP 204
 ```
 PUT /files/17f44dbe1c4bace0e18ab850cf2b3a83 HTTP/1.1
 Content-Length: 6
+Uncompressed-Length: 6
 Upload-Offset: 5
 Is-Final: 1
 
@@ -111,6 +113,9 @@ resource. The value MUST be a non-negative integer.
 The `Upload-Length` request and response header indicates the size of the entire
 upload in bytes. The value MUST be a non-negative integer. Should be added if known.
 
+### Uncompressed-Length
+The `Uncompressed-Length` request header represend the content size after decompression.
+
 
 #### Max-Size
 
@@ -120,7 +125,7 @@ there is a known hard limit.
 
 #### Is-Final
 Sent with the last put requests and indicates the the upload is finished and the file size will be:
-</br> ```[Upload-Offset + Content-Length]```
+</br> ```[Upload-Offset + Uncompressed-Length]```
 
 </br>
 ### Requests
