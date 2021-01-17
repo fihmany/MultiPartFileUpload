@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Primitives;
-
-namespace MultiPartFileUpload.Contracts
+﻿namespace MultiPartFileUpload.Contracts
 {
     public class UploadRequestHeaders
     {
-        public long ContentLength { get; set; }
+        public int ContentLength { get; set; }
+        public int UncompressedLength { get; set; }
         public int UploadOffset { get; set; }
+        public int? UploadLen { get; set; }
         public bool IsFinal { get; set; }
     }
 }

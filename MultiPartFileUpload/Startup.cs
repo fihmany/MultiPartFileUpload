@@ -11,7 +11,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MultiPartFileUpload.BL;
+using MultiPartFileUpload.Compressions;
 using MultiPartFileUpload.Config;
+using MultiPartFileUpload.Managers;
 
 namespace MultiPartFileUpload
 {
@@ -29,6 +31,9 @@ namespace MultiPartFileUpload
         {
             services.Configure<FileUploadConfig>(Configuration.GetSection("FileUploadConfig"));
 
+            services.AddSingleton<ICompression, NoneCompression>();
+            services.AddSingleton<ICompression, GzipCompression>();
+            services.AddSingleton<CompressionManager>();
             services.AddSingleton<MultiPartFileUploadBl>();
             services.AddControllers();
         }

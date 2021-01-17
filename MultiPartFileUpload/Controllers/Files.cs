@@ -22,6 +22,9 @@ namespace MultiPartFileUpload.Controllers
         private const string UploadOffset = "Upload-Offset";
         private const string IsFinal = "Is-Final";
         private const string MaxSize = "Max-Size";
+        private const string UncompressedLen = "Uncompressed-Length";
+        private const string UploadLen = "Upload-Length";
+        private const string ContentTypeValue = "application/offset+octet-stream";
         private const int MaxSizeValue = 30000;
 
         public Files(MultiPartFileUploadBl bl, ILogger<Files> logger)
@@ -31,59 +34,60 @@ namespace MultiPartFileUpload.Controllers
         }
 
         [HttpPost]
-        public CreateUploadContract GenerateNewUpload()
+        public CreateUploadContract GenerateNewUpload(UploadMetaData metaData)
         {
-            UploadMetaData tmp = new UploadMetaData()
+            if (!_bl.ValidateInitializationMetaData(metaData))
             {
-                Compression = "None",
-                Aa = "aa",
-                Bb = "bb",
-                Data = new Dictionary<string, string>()
-            };
+                return new CreateUploadContract { Location = "BadRequest" };
+            }
+
             Response.Headers.Add(MaxSize, MaxSizeValue.ToString());
-            return GenerateReturnLocation(Request.Path.Value, _bl.GenerateUploadProcess(tmp));
+            return GenerateReturnLocation(Request.Path.Value, _bl.GenerateUploadProcess(metaData));
         }
 
         [HttpGet]
+        //TODO: I authentication filter
         public string GetCurrentUploads()
         {
             return string.Join
             (
                 "\n",
-                _bl.UploadsInProgress.Select(pair => $"{pair.Key}={pair.Value}").ToArray()
+                MultiPartFileUploadBl.UploadsInProgress.Select(pair => $"{pair.Key}={pair.Value}").ToArray()
             ); ;
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult>UploadFile(string id)
+        public async Task<IActionResult> UploadFile(string id)
         {
-            if (!ValidatePutRequest(Request.Headers) || !_bl.CheckIfUploadIdActive(id))
+            if (!ValidatePutRequest(Request) || !_bl.CheckIfUploadIdActive(id))
             {
                 return NotFound();
             }
 
             UploadRequestHeaders headers = ExtractHeaders(Request.Headers);
-            await _bl.UploadPart(id, headers.UploadOffset, Request.Body, headers.IsFinal);
-            return Ok();
+            await _bl.UploadPart(id, headers.UploadOffset, headers.UncompressedLength, Request.Body, headers.IsFinal);
+            return NoContent();
         }
 
-        private bool ValidatePostRequest()
+        private static bool ValidatePutRequest(HttpRequest request)
         {
-            return true;
-        }
-
-        private static bool ValidatePutRequest(IHeaderDictionary headers)
-        {
-            return headers.ContainsKey(ContentLen) && headers.ContainsKey(UploadOffset) && headers.ContainsKey(IsFinal);
+            IHeaderDictionary headers = request.Headers;
+            return request.ContentType == ContentTypeValue &&
+                   headers.ContainsKey(ContentLen) &&
+                   headers.ContainsKey(UploadOffset) &&
+                   headers.ContainsKey(IsFinal) &&
+                   headers.ContainsKey(UncompressedLen);
         }
 
         private static UploadRequestHeaders ExtractHeaders(IHeaderDictionary headers)
         {
             return new UploadRequestHeaders()
             {
-                ContentLength = headers.ContentLength ?? 0,
+                ContentLength = (int) (headers.ContentLength ?? 0),
                 IsFinal = headers[IsFinal].ToString() != "0",
-                UploadOffset = int.Parse(headers[UploadOffset].ToString())
+                UploadOffset = int.Parse(headers[UploadOffset].ToString()),
+                UncompressedLength = int.Parse(headers[UncompressedLen].ToString()),
+                UploadLen = headers.ContainsKey(UploadLen) ? int.Parse(headers[UploadLen].ToString()) : (int?)null
             };
         }
 
