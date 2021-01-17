@@ -33,6 +33,7 @@ namespace MultiPartFileUpload
 
             services.AddSingleton<ICompression, NoneCompression>();
             services.AddSingleton<ICompression, GzipCompression>();
+            services.AddSingleton<ICompression, DeflateCompression>();
             services.AddSingleton<CompressionManager>();
             services.AddSingleton<MultiPartFileUploadBl>();
             services.AddControllers();
